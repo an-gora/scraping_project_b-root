@@ -58,7 +58,7 @@ def pars_main(url: str) -> list:
     return product_list
 
 
-def pars_extra(product:Product):
+def pars_extra(product: Product):
     res = requests.get(product.link_to_product)
     bs = BeautifulSoup(res.text, 'lxml')
     table = bs.find_all('tr')
@@ -72,7 +72,6 @@ def pars_extra(product:Product):
     out_list = []
     out_list.append(product)
     return out_list
-
 
 
 def pages_in_category(url: str) -> int:
@@ -100,7 +99,7 @@ def collect_main_data():
     pages_in_cat = pages_in_category(base_category_url)
     links_list = []
     for page in range(1, pages_in_cat + 1):
-        links_list.append(base_category_url+'page/'+str(page))
+        links_list.append(base_category_url + 'page/' + str(page))
     products = grabber(links_list, pars_main)
     full_products = grabber(products, pars_extra)
     return full_products
@@ -111,7 +110,7 @@ def to_json(data: list):
     for item in data:
         general_list.append(item.__dict__)
     with open('products.json', 'w') as file:
-        json.dump(general_list, file, indent = 4)
+        json.dump(general_list, file, indent=4)
 
 
 list_of_shamp = collect_main_data()
