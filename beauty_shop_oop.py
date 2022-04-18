@@ -8,7 +8,6 @@ from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import re
 
-
 BASE_URL = 'https://sisters.co.ua'
 
 
@@ -32,32 +31,35 @@ class Product:
 
 
 class ProductList:
+
     def __iter__(self):
-        session = requests.Session()
-        res = session.get(url)
-        bs = BeautifulSoup(res.text, 'lxml')
+        return self
 
     def __next__(self):
         pass
 
 
-# def create_b_soup(url: str)->BeautifulSoup:
-#     res = requests.get(url)
-#     bs = BeautifulSoup(res.text, 'lxml')
+    @classmethod
+    def data_from_file(cls):
+        pass
+
+
+    @classmethod
+    def data_from_web(cls):
+        collect_main_data()
+
 
 
 def pars_main(url: str) -> list:
     res = requests.get(url)
     bs = BeautifulSoup(res.text, 'lxml')
     cards_on_page = bs.find_all('div', class_='card')
-    # links_list = []
     product_list = []
     for card in cards_on_page:
         link = BASE_URL + card.find('a').attrs['href']
         name = card.find('div', class_='card-inner').text.strip()
         category = card.find('div', class_='card-category').text.strip().strip('#')
         try:
-            # price = int(re.sub("[^0-9]", "", card.find('div', class_='card-price').text.strip()))
             price = int(re.sub("[^0-9]", "", card.find('div', class_='card-price').find_all('p')[-1].text.strip()))
         except:
             price = None
@@ -65,10 +67,7 @@ def pars_main(url: str) -> list:
         img_link = BASE_URL + card.find('div', class_='card-image').find('img').attrs['src']
         brand = card.find('div', class_='card-brand').text.strip()
         img_path = img_link.split('/')[-1]
-        # id = bs.find('div', class_='card-footer').find('button').attrs['data-id']
         product_list.append(Product(name, category, price, brand, img_link, link, img_path))
-    # print(product_list)
-    # print(url)
     return product_list
 
 
@@ -78,7 +77,6 @@ def pars_extra(product: Product):
 
     table = bs.find_all('tr')
     try:
-        # product.id = bs.find('meta', itemprop='mpn').attrs['content']
         product.id = bs.find('meta', itemprop='mpn').attrs['content']
     except:
         product.id = None
@@ -160,3 +158,5 @@ collect_main_data()
 # to_json(list_of_shamp)
 for item in list_of_shamp:
     save_image(item)
+
+
