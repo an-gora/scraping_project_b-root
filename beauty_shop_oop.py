@@ -26,15 +26,11 @@ class Product:
     origin: str = ''
     gender: str = ''
 
-    def download_data(self):
-        pass
-
 
 class ProductList:
     def __init__(self):
         self.product_list = []
         self.i = 0
-
 
     def __iter__(self):
         self.i = 0
@@ -45,10 +41,7 @@ class ProductList:
             if self.i <= len(self.product_list) - 1:
                 self.i += 1
                 return self.product_list[self.i - 1]
-        raise  StopIteration
-
-
-
+        raise StopIteration
 
     def write_to_file(self):
         with open('products', 'wb') as file_object:
@@ -63,11 +56,8 @@ class ProductList:
         except FileNotFoundError:
             return cls
 
-
     def data_from_web(self):
         self.product_list = self.collect_main_data()
-
-
 
     def pars_main(self, url: str) -> list:
         res = requests.get(url)
@@ -88,7 +78,6 @@ class ProductList:
             img_path = img_link.split('/')[-1]
             product_list.append(Product(name, category, price, brand, img_link, link, img_path))
         return product_list
-
 
     def pars_extra(self, product: Product):
         res = requests.get(product.link_to_product)
@@ -112,14 +101,12 @@ class ProductList:
         self.save_image(product)
         return out_list
 
-
     def pages_in_category(self, url: str) -> int:
         session = requests.Session()
         res = session.get(url)
         bs = BeautifulSoup(res.text, 'lxml')
         pag = bs.find_all('li', class_='next')
         return int(pag[-1].find('a').attrs['data-page']) + 1
-
 
     def grabber(self, links: list, parser):
         with ThreadPoolExecutor(10) as executor:
@@ -132,26 +119,23 @@ class ProductList:
         print(elements)
         return elements
 
-
     def collect_main_data(self):
         base_category_url = 'https://sisters.co.ua/kosmetyka-dlya-volossa/'
         pages_in_cat = self.pages_in_category(base_category_url)
         links_list = []
         for page in range(90, 91):
-        # for page in range(1, pages_in_cat + 1):
+            # for page in range(1, pages_in_cat + 1):
             links_list.append(base_category_url + 'page/' + str(page))
         products = self.grabber(links_list, self.pars_main)
         full_products = self.grabber(products, self.pars_extra)
         return full_products
 
-
     def to_json(self):
         general_list = []
         for item in self.product_list:
             general_list.append(item.__dict__)
-        with open('products_test.json', 'w') as file:
+        with open('products.json', 'w') as file:
             json.dump(general_list, file, indent=4, ensure_ascii=False)
-
 
     def save_image(self, product: Product):
         path_to_img_dir = path.join(path.dirname(__file__), 'img_dir')
@@ -162,10 +146,9 @@ class ProductList:
             photo.write(requests.get(product.img_link).content)
 
 
-
-
 pl = ProductList()
 pl.data_from_web()
+# pl.to_json()
 # pl.write_to_file()
 # pl_2 = ProductList.load_from_file()
 # pl_2.to_json()
